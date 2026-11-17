@@ -13,16 +13,16 @@ const ADMIN_ID = process.env.ADMIN_ID;
 const PRIVACY_LINK = process.env.PRIVACY_LINK || 'https://privacy.com.br/profile/SEU_PERFIL';
 
 // ==========================================
-// 📸 BANCO DE FOTOS DE PRÉVIA (ROTAÇÃO)
+// 📸🎥 BANCO DE FOTOS E VÍDEOS DE PRÉVIA (ROTAÇÃO)
 // ==========================================
-// DICA: Envie suas fotos no privado do bot (usando sua conta ADMIN_ID).
-// Ele vai te responder com o "file_id" exato para você colar aqui abaixo!
-// Você também pode usar links diretos de imagens (https://...).
-const FOTOS_PREVIA = [
-    'https://via.placeholder.com/600x800.png?text=Previas+18+Foto+1',
-    'https://via.placeholder.com/600x800.png?text=Previas+18+Foto+2',
-    'https://via.placeholder.com/600x800.png?text=Previas+18+Foto+3',
-    'https://via.placeholder.com/600x800.png?text=Previas+18+Foto+4'
+// Envie suas fotos ou vídeos no privado do bot (com sua conta ADMIN_ID).
+// Ele vai responder com a linha pronta para você colar aqui dentro:
+const MIDIAS_PREVIA = [
+    { tipo: 'foto', id: 'https://via.placeholder.com/600x800.png?text=Previas+18+Foto+1' },
+    { tipo: 'foto', id: 'https://via.placeholder.com/600x800.png?text=Previas+18+Foto+2' }
+    // Exemplo de como vai ficar quando você adicionar seus arquivos:
+    // { tipo: 'foto', id: 'AgACAgEAAxkBAA...' },
+    // { tipo: 'video', id: 'BAACAgEAAxkBAA...' },
 ];
 
 // ==========================================
@@ -31,7 +31,7 @@ const FOTOS_PREVIA = [
 const BOAS_VINDAS_PICANTES = [
     `😈 <b>Oi amor, que bom que você veio...</b>\n\nAqui no Telegram eu preciso me comportar, mas no meu <b>Privacy</b> eu mostro TUDO sem censura e sem cortes 🔞💦\n\n🔥 Vídeos íntimos completos\n🔥 Bastidores bem safados\n🔥 Chat privado comigo\n\n💸 <b>É SÓ R$ 30,00</b> para liberar o acesso completo agora mesmo! Vem me ver bem de pertinho 👇`,
 
-    `🤫 <b>Psiu... tava te esperando!</b>\n\nEssa foto é só uma pequena amostra do que eu aprontei hoje... O vídeo completo ficou proibido demais pra postar aqui 🔥😈\n\nPor <b>APENAS R$ 30,00</b> você destrava meu <b>Privacy VIP</b> com dezenas de vídeos e fotos sem nenhuma censura 💋\n\n👇 <b>Clica abaixo antes que eu tire da promoção:</b>`,
+    `🤫 <b>Psiu... tava te esperando!</b>\n\nEssa prévia é só uma pequena amostra do que eu aprontei hoje... O vídeo completo ficou proibido demais pra postar aqui 🔥😈\n\nPor <b>APENAS R$ 30,00</b> você destrava meu <b>Privacy VIP</b> com dezenas de vídeos e fotos sem nenhuma censura 💋\n\n👇 <b>Clica abaixo antes que eu tire da promoção:</b>`,
 
     `🔞 <b>Você aguenta ver o resto?</b> 👀🔥\n\nSe você gostou dessa prévia, imagina o que tem guardado no meu <b>Privacy</b>... Posto conteúdo novo toda semana bem à vontade pra você 💦\n\n💎 Acesso total por <b>SÓ R$ 30,00</b> (liberação imediata no PIX ou Cartão).\n\nVem gozar de curiosidade lá dentro 👇😈`,
 
@@ -50,7 +50,7 @@ const MENSAGENS_DISPARO = [
 
     `🚨 <b>PROMOÇÃO RELÂMPAGO LIBERADA!</b> 🔞🔥\n\nBaixei o acesso do meu <b>Privacy</b> pra <b>SÓ R$ 30,00</b> hoje! Pagou no PIX, liberou na hora sem enrolação 😈💦\n\nVem ver tudo o que o Telegram censura 👇`,
 
-    `🌶️ <b>Uma prévia pra deixar seu dia mais quente...</b>\n\nQuer ver o que aconteceu depois dessa foto? O vídeo completo tá disponível agora no meu <b>Privacy</b> 🔞\n\n💎 Acesso total por <b>apenas R$ 30,00</b>! Clica abaixo e vem 👇`
+    `🌶️ <b>Uma prévia pra deixar seu dia mais quente...</b>\n\nQuer ver o que aconteceu depois disso? O vídeo completo tá disponível agora no meu <b>Privacy</b> 🔞\n\n💎 Acesso total por <b>apenas R$ 30,00</b>! Clica abaixo e vem 👇`
 ];
 
 // ==========================================
@@ -58,15 +58,15 @@ const MENSAGENS_DISPARO = [
 // ==========================================
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-let indexFoto = 0;
+let indexMidia = 0;
 let indexStart = 0;
 let indexDisparo = 0;
 let disparoEmAndamento = false;
 
-function proximaFoto() {
-    const foto = FOTOS_PREVIA[indexFoto % FOTOS_PREVIA.length];
-    indexFoto++;
-    return foto;
+function proximaMidia() {
+    const midia = MIDIAS_PREVIA[indexMidia % MIDIAS_PREVIA.length];
+    indexMidia++;
+    return midia;
 }
 
 function proximaMsgStart() {
@@ -81,6 +81,21 @@ function proximaMsgDisparo() {
     return msg;
 }
 
+// Função inteligente que identifica se é foto ou vídeo e envia automaticamente
+async function enviarMidia(telegram, chatId, midia, caption, replyMarkup) {
+    const opcoes = {
+        caption: caption,
+        parse_mode: 'HTML',
+        reply_markup: replyMarkup
+    };
+
+    if (midia.tipo === 'video') {
+        return await telegram.sendVideo(chatId, midia.id, opcoes);
+    } else {
+        return await telegram.sendPhoto(chatId, midia.id, opcoes);
+    }
+}
+
 function tecladoConversao(incluirBotoesExtras = true) {
     const botoes = [
         [{ text: '🔥 ASSINAR PRIVACY AGORA (R$ 30,00) 🔞', url: PRIVACY_LINK }]
@@ -88,7 +103,7 @@ function tecladoConversao(incluirBotoesExtras = true) {
 
     if (incluirBotoesExtras) {
         botoes.push([
-            { text: '📸 Mais uma prévia', callback_data: 'mais_previa' },
+            { text: '🔥 Mais uma prévia', callback_data: 'mais_previa' },
             { text: '💳 Como pagar / Acesso', callback_data: 'como_funciona' }
         ]);
     }
@@ -106,23 +121,17 @@ bot.start(async (ctx) => {
     const firstName = ctx.from.first_name || 'Amor';
     const username = ctx.from.username || '';
 
-    // Salva ou atualiza o lead no Supabase
     await supabase.from('privacy_leads').upsert(
         { telegram_id: userId, first_name: firstName, username: username },
         { onConflict: 'telegram_id' }
     );
 
-    const foto = proximaFoto();
+    const midia = proximaMidia();
     const legenda = proximaMsgStart();
 
     try {
-        await ctx.replyWithPhoto(foto, {
-            caption: legenda,
-            parse_mode: 'HTML',
-            reply_markup: tecladoConversao(true)
-        });
+        await enviarMidia(ctx.telegram, ctx.chat.id, midia, legenda, tecladoConversao(true));
     } catch (err) {
-        // Fallback caso a foto falhe por algum motivo
         await ctx.replyWithHTML(legenda, {
             disable_web_page_preview: true,
             reply_markup: tecladoConversao(true)
@@ -135,24 +144,20 @@ bot.start(async (ctx) => {
 // ==========================================
 bot.action('mais_previa', async (ctx) => {
     await ctx.answerCbQuery('🔥 Enviando outra prévia...').catch(() => {});
-    const foto = proximaFoto();
+    const midia = proximaMidia();
 
     const textosExtras = [
-        `😈 <b>Gostou dessa, né?</b> Imagina ver em vídeo e sem nada cobrindo...\n\nPor <b>SÓ R$ 30,00</b> você libera tudo no meu Privacy agora 👇`,
-        `💦 <b>Essa aqui quase foi banida...</b> O resto dela tá completo no meu Privacy! Acesso por <b>apenas R$ 30,00</b> 👇`,
+        `😈 <b>Gostou dessa, né?</b> Imagina ver tudo sem censura e sem cortes...\n\nPor <b>SÓ R$ 30,00</b> você libera tudo no meu Privacy agora 👇`,
+        `💦 <b>Essa prévia quase foi banida...</b> O resto dela tá completo no meu Privacy! Acesso por <b>apenas R$ 30,00</b> 👇`,
         `🔞 <b>Última amostra grátis!</b> O conteúdo pesado mesmo tá guardado no meu Privacy por <b>SÓ R$ 30,00</b> 🔥👇`
     ];
     const textoAleatorio = textosExtras[Math.floor(Math.random() * textosExtras.length)];
 
     try {
-        await ctx.replyWithPhoto(foto, {
-            caption: textoAleatorio,
-            parse_mode: 'HTML',
-            reply_markup: {
-                inline_keyboard: [
-                    [{ text: '🔞 QUERO VER TUDO AGORA (R$ 30,00)', url: PRIVACY_LINK }]
-                ]
-            }
+        await enviarMidia(ctx.telegram, ctx.chat.id, midia, textoAleatorio, {
+            inline_keyboard: [
+                [{ text: '🔞 QUERO VER TUDO AGORA (R$ 30,00)', url: PRIVACY_LINK }]
+            ]
         });
     } catch (err) {
         console.error('Erro ao enviar prévia extra:', err.message);
@@ -181,14 +186,12 @@ bot.on('my_chat_member', async (ctx) => {
 
     if (chat.type === 'private') return;
 
-    // Se o bot foi removido ou expulso, apaga do banco
     if (['left', 'kicked'].includes(status)) {
         await supabase.from('privacy_groups').delete().eq('chat_id', chat.id.toString());
         console.log(`🗑️ [GRUPO REMOVIDO] ${chat.title} (${chat.id})`);
         return;
     }
 
-    // Se o bot foi adicionado como membro ou administrador
     if (['member', 'administrator'].includes(status)) {
         await supabase.from('privacy_groups').upsert(
             { chat_id: chat.id.toString(), title: chat.title || 'Grupo sem nome' },
@@ -196,17 +199,18 @@ bot.on('my_chat_member', async (ctx) => {
         );
         console.log(`✅ [NOVO GRUPO] ${chat.title} (${chat.id}) cadastrado!`);
 
-        // Já faz uma primeira postagem e tenta fixar assim que entra
         try {
-            const msgEnviada = await ctx.telegram.sendPhoto(chat.id, proximaFoto(), {
-                caption: proximaMsgDisparo(),
-                parse_mode: 'HTML',
-                reply_markup: {
+            const msgEnviada = await enviarMidia(
+                ctx.telegram,
+                chat.id,
+                proximaMidia(),
+                proximaMsgDisparo(),
+                {
                     inline_keyboard: [
                         [{ text: '🔥 ACESSAR PRIVACY AGORA (R$ 30,00) 🔞', url: PRIVACY_LINK }]
                     ]
                 }
-            });
+            );
             await ctx.telegram.pinChatMessage(chat.id, msgEnviada.message_id, { disable_notification: true }).catch(() => {});
         } catch (err) {
             console.log(`⚠️ Não foi possível postar ao entrar em ${chat.title}:`, err.message);
@@ -233,30 +237,25 @@ async function executarDisparoGeral() {
 
         if (leads && leads.length > 0) {
             for (const lead of leads) {
-                const fotoAtual = proximaFoto();
+                const midiaAtual = proximaMidia();
                 const textoAtual = proximaMsgDisparo();
 
                 try {
-                    await bot.telegram.sendPhoto(lead.telegram_id, fotoAtual, {
-                        caption: textoAtual,
-                        parse_mode: 'HTML',
-                        reply_markup: {
-                            inline_keyboard: [
-                                [{ text: '🔥 ENTRAR NO PRIVACY (R$ 30,00) 🔞', url: PRIVACY_LINK }],
-                                [{ text: '📸 Ver mais uma prévia', callback_data: 'mais_previa' }]
-                            ]
-                        }
+                    await enviarMidia(bot.telegram, lead.telegram_id, midiaAtual, textoAtual, {
+                        inline_keyboard: [
+                            [{ text: '🔥 ENTRAR NO PRIVACY (R$ 30,00) 🔞', url: PRIVACY_LINK }],
+                            [{ text: '🔥 Ver mais uma prévia', callback_data: 'mais_previa' }]
+                        ]
                     });
                     enviadosPv++;
                 } catch (err) {
                     const desc = err.response?.description || err.message || '';
-                    // Se o usuário bloqueou o bot ou deletou a conta, limpa do banco
                     if (desc.includes('blocked') || desc.includes('deactivated') || desc.includes('chat not found')) {
                         await supabase.from('privacy_leads').delete().eq('telegram_id', lead.telegram_id);
                         bloqueadosPv++;
                     }
                 }
-                await sleep(120); // Pausa leve para respeitar limite do Telegram (evita ban)
+                await sleep(120);
             }
         }
 
@@ -266,21 +265,16 @@ async function executarDisparoGeral() {
 
         if (grupos && grupos.length > 0) {
             for (const grupo of grupos) {
-                const fotoAtual = proximaFoto();
+                const midiaAtual = proximaMidia();
                 const textoAtual = proximaMsgDisparo();
 
                 try {
-                    const msgGrupo = await bot.telegram.sendPhoto(grupo.chat_id, fotoAtual, {
-                        caption: textoAtual,
-                        parse_mode: 'HTML',
-                        reply_markup: {
-                            inline_keyboard: [
-                                [{ text: '🔥 ASSINAR PRIVACY AGORA (R$ 30,00) 🔞', url: PRIVACY_LINK }]
-                            ]
-                        }
+                    const msgGrupo = await enviarMidia(bot.telegram, grupo.chat_id, midiaAtual, textoAtual, {
+                        inline_keyboard: [
+                            [{ text: '🔥 ASSINAR PRIVACY AGORA (R$ 30,00) 🔞', url: PRIVACY_LINK }]
+                        ]
                     });
 
-                    // Fixa a mensagem no topo do grupo silenciosamente
                     await bot.telegram.pinChatMessage(grupo.chat_id, msgGrupo.message_id, {
                         disable_notification: true
                     }).catch(() => {});
@@ -288,12 +282,11 @@ async function executarDisparoGeral() {
                     enviadosGrupos++;
                 } catch (err) {
                     const desc = err.response?.description || err.message || '';
-                    // Se o bot foi expulso ou perdeu permissão de envio, remove do banco
                     if (desc.includes('kicked') || desc.includes('not a member') || desc.includes('chat not found') || desc.includes('have rights')) {
                         await supabase.from('privacy_groups').delete().eq('chat_id', grupo.chat_id);
                     }
                 }
-                await sleep(2000); // 2 segundos entre grupos
+                await sleep(2000);
             }
         }
 
@@ -305,7 +298,6 @@ async function executarDisparoGeral() {
     }
 }
 
-// Agenda para rodar a cada 3 horas (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00)
 cron.schedule('0 */3 * * *', () => {
     executarDisparoGeral();
 }, {
@@ -314,21 +306,25 @@ cron.schedule('0 */3 * * *', () => {
 });
 
 // ==========================================
-// 5. PAINEL ADMIN E CAPTURA DE FILE_ID DE FOTOS
+// 5. PAINEL ADMIN E CAPTURA DE FOTOS E VÍDEOS
 // ==========================================
-// Quando VOCÊ (ADMIN_ID) enviar uma foto no privado do bot, ele devolve o código dela
-bot.on('photo', async (ctx) => {
+bot.on(['photo', 'video'], async (ctx) => {
     if (ctx.chat.type !== 'private') return;
     if (ADMIN_ID && ctx.from.id.toString() !== ADMIN_ID.toString()) return;
 
-    const fotos = ctx.message.photo;
-    const maiorResolucao = fotos[fotos.length - 1];
-    await ctx.replyWithHTML(
-        `📸 <b>Foto capturada com sucesso!</b>\n\nCopie o código abaixo e cole dentro da lista <code>FOTOS_PREVIA</code> no código:\n\n<code>'${maiorResolucao.file_id}',</code>`
-    );
+    if (ctx.message.photo) {
+        const maiorResolucao = ctx.message.photo[ctx.message.photo.length - 1];
+        await ctx.replyWithHTML(
+            `📸 <b>Foto capturada!</b> Copie e cole dentro de <code>MIDIAS_PREVIA</code>:\n\n<code>{ tipo: 'foto', id: '${maiorResolucao.file_id}' },</code>`
+        );
+    } else if (ctx.message.video) {
+        const videoId = ctx.message.video.file_id;
+        await ctx.replyWithHTML(
+            `🎥 <b>Vídeo capturado!</b> Copie e cole dentro de <code>MIDIAS_PREVIA</code>:\n\n<code>{ tipo: 'video', id: '${videoId}' },</code>`
+        );
+    }
 });
 
-// Comando /admin para ver estatísticas e testar o disparo na hora
 bot.command('admin', async (ctx) => {
     if (ADMIN_ID && ctx.from.id.toString() !== ADMIN_ID.toString()) return;
 
