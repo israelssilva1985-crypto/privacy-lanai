@@ -18,8 +18,15 @@ const PRIVACY_LINK = process.env.PRIVACY_LINK || 'https://privacy.com.br/profile
 // Envie suas fotos ou vídeos no privado do bot (com sua conta ADMIN_ID).
 // Ele vai responder com a linha pronta para você colar aqui dentro:
 const MIDIAS_PREVIA = [
-    { tipo: 'foto', id: 'https://via.placeholder.com/600x800.png?text=Previas+18+Foto+1' },
-    { tipo: 'foto', id: 'https://via.placeholder.com/600x800.png?text=Previas+18+Foto+2' }
+    { tipo: 'foto', id: 'AgACAgEAAxkBAAMFavx-Dg5rqSdLES55y0GME6Iz_j8AAnMNaxsBfOhHyTigGvOTLBABAAMCAAN5AAM9BA' },
+    { tipo: 'video', id: 'BAACAgEAAxkBAAMIavx-DhBfusnE91sjkVrfKDGCVPkAAqAIAAIBfOhH4lpmBmdWBbA9BA' },
+    { tipo: 'foto', id: 'AgACAgEAAxkBAAMMavx-DnZ7dmslVYSNGLBSrDuCoIgAAnoNaxsBfOhHOkXVYi9lBiwBAAMCAAN5AAM9BA' },
+    { tipo: 'foto', id: 'AgACAgEAAxkBAAMNavx-DiFuyvtxSvkoaR2YXj263NAAAngNaxsBfOhHpv2tbgGTMB0BAAMCAAN5AAM9BA' },
+    { tipo: 'video', id: 'BAACAgEAAxkBAAMHavx-DodYCuclNDDmzYYqncz9cqsAAp8IAAIBfOhHmkVgs7MkkLw9BA' },
+    { tipo: 'foto', id: 'AgACAgEAAxkBAAMLavx-DqApgevDxFAuYtMKTgOZImUAAnkNaxsBfOhHrlCMIqepXU4BAAMCAAN5AAM9BA' },
+    { tipo: 'foto', id: 'AgACAgEAAxkBAAMJavx-Dqwb_XOiW48dRGiTf5Jg8x0AAncNaxsBfOhH3L5t-N1cFDABAAMCAAN5AAM9BA' },
+    { tipo: 'foto', id: 'AgACAgEAAxkBAAMKavx-Doh0LyAfEAL1CHmWtQQSujQAAnYNaxsBfOhHvm-N9QWT-CkBAAMCAAN4AAM9BA' },
+    { tipo: 'foto', id: 'AgACAgEAAxkBAAMGavx-DoXhOflN2WUmCDPd2Kfnz4kAAnQNaxsBfOhHB-zDUTYj_M0BAAMCAAN5AAM9BA' }
     // Exemplo de como vai ficar quando você adicionar seus arquivos:
     // { tipo: 'foto', id: 'AgACAgEAAxkBAA...' },
     // { tipo: 'video', id: 'BAACAgEAAxkBAA...' },
