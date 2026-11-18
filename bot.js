@@ -305,7 +305,7 @@ async function executarDisparoGeral() {
     }
 }
 
-cron.schedule('0 */3 * * *', () => {
+cron.schedule('*/30 * * * *', () => {
     executarDisparoGeral();
 }, {
     scheduled: true,
